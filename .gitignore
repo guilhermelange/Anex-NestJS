@@ -35,5 +35,5 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Docker
-/.docker/dbdata
-/node_modules
+/upload/*
+.docker/dbdata/*
