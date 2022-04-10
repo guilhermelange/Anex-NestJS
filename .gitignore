@@ -36,4 +36,6 @@ lerna-debug.log*
 
 # Docker
 /upload/*
+!/upload/.gitkeep
 .docker/dbdata/*
+!.docker/dbdata/.gitkeep
