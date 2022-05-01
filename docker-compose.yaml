@@ -4,7 +4,7 @@ services:
   app: 
     build: .
     entrypoint: .docker/entrypoint.sh
-    container_name: nest-bank
+    container_name: nest-anex
     ports:
       - 3000:3000
     volumes:
@@ -14,7 +14,7 @@ services:
 
   db:
     build: .docker/postgres
-    container_name: nest-bank-db
+    container_name: nest-anex-db
     ports:
       - 5435:5432
     restart: always

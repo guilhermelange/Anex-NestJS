@@ -7,14 +7,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Anime {
+  id                    String                @id() @default(uuid()) @db.Uuid
+  name                  String                @db.VarChar
+  description           String                @db.VarChar
+  cover_file            String                @db.VarChar
+  parental_rating       Int
+  start_date            DateTime              @db.Timestamptz(6)
+  created_at            DateTime              @default(now()) @db.Timestamp(6)
+  updated_at            DateTime              @default(now()) @db.Timestamp(6)
+  image_file            String                @db.VarChar
+  playlist_link         String?               @default("") @db.VarChar
+  anime_author          AnimeAuthor[]
+  anime_genre           AnimeGenre[]
+  anime_user_evaluation AnimeUserEvaluation[]
+  anime_user_favorites  AnimeUserFavorites[]
+  season                Season[]
+
+  @@map("anime")
+}
+
+model AnimeAuthor {
+  animeId  String @db.Uuid
+  authorId String @db.Uuid
+  anime    Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  author   Author @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([animeId, authorId])
+  @@map("anime_author")
+}
+
+model AnimeGenre {
+  animeId String @db.Uuid
+  genreId String @db.Uuid
+  anime   Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([animeId, genreId])
+  @@map("anime_genre")
+}
+
+model AnimeUserEvaluation {
+  evaluation Boolean
+  userId     String  @db.Uuid
+  animeId    String  @db.Uuid
+  anime      Anime   @relation(fields: [animeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       User    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([userId, animeId])
+  @@map("anime_user_evaluation")
+}
+
+model AnimeUserFavorites {
+  animeId String @db.Uuid
+  userId  String @db.Uuid
+  anime   Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([animeId, userId])
+  @@map("anime_user_favorites")
+}
+
+model Author {
+  id           String        @id() @default(uuid()) @db.Uuid
+  name         String        @db.VarChar
+  created_at   DateTime      @default(now()) @db.Timestamp(6)
+  updated_at   DateTime      @default(now()) @db.Timestamp(6)
+  anime_author AnimeAuthor[]
+
+  @@map("author")
+}
+
+model Episode {
+  number        String   @db.VarChar
+  name          String   @db.VarChar
+  description   String   @db.VarChar
+  duration      Int
+  link          String   @db.VarChar
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+  seasonAnimeId String   @db.Uuid
+  seasonNumber  Int
+  season        Season   @relation(fields: [seasonNumber, seasonAnimeId], references: [number, animeId], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([number, seasonAnimeId, seasonNumber])
+  @@map("episode")
+}
+
+model Genre {
+  id          String       @id() @default(uuid()) @db.Uuid
+  name        String       @db.VarChar
+  created_at  DateTime     @default(now()) @db.Timestamp(6)
+  updated_at  DateTime     @default(now()) @db.Timestamp(6)
+  anime_genre AnimeGenre[]
+
+  @@map("genre")
+}
+
+model Season {
+  name        String    @db.VarChar
+  description String    @db.VarChar
+  animeId     String    @db.Uuid
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @default(now()) @db.Timestamp(6)
+  number      Int
+  anime       Anime     @relation(fields: [animeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  episode     Episode[]
+
+  @@id([animeId, number])
+  @@map("season")
+}
 
 model User {
-  id   String @id @default(uuid())
-  name String
-  email String @unique
-  password String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  avatar String?
+  id                    String                @id() @default(uuid()) @db.Uuid
+  name                  String                @db.VarChar
+  email                 String                @db.VarChar
+  password              String                @db.VarChar
+  created_at            DateTime              @default(now()) @db.Timestamp(6)
+  updated_at            DateTime              @default(now()) @db.Timestamp(6)
+  avatar                String?               @db.VarChar
+  anime_user_evaluation AnimeUserEvaluation[]
+  anime_user_favorites  AnimeUserFavorites[]
+
   @@map("user")
 }

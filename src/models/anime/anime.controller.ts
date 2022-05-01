@@ -1,45 +1,45 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Req,
+  ParseUUIDPipe,
+  Put,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AnimeService } from './anime.service';
-import { CreateAnimeDto } from './dto/create-anime.dto';
 import { UpdateAnimeDto } from './dto/update-anime.dto';
-
-@Controller('anime')
+@Controller('animes')
 export class AnimeController {
   constructor(private readonly animeService: AnimeService) {}
-
-  @Post()
-  create(@Body() createAnimeDto: CreateAnimeDto) {
-    return this.animeService.create(createAnimeDto);
-  }
-
   @Get()
   findAll(@Req() request: Request) {
-    const { id } = request.user;
-    return this.animeService.findAll(id);
+    const { id: userId } = request.user;
+    return this.animeService.findAll(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.animeService.findOne(+id);
+  findOne(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() request: Request,
+  ) {
+    const { id: userId } = request.user;
+    return this.animeService.findOne(userId, id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnimeDto: UpdateAnimeDto) {
-    return this.animeService.update(+id, updateAnimeDto);
+  @Get(':id/seasons')
+  findOneSeasons(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.animeService.findOneSeasons(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.animeService.remove(+id);
+  @Put(':id')
+  updateAnime(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() request: Request,
+    @Body() animeUpdate: UpdateAnimeDto,
+  ) {
+    const { id: userId } = request.user;
+    return this.animeService.updateOne(userId, animeUpdate, id);
   }
 }

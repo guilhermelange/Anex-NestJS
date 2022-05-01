@@ -1,6 +1,6 @@
-import { User as PrismaUser } from 'src/database/prisma';
+import { User } from 'src/database/prisma';
 
-export class User implements PrismaUser {
+export class UserPrisma implements User {
   id: string;
   name: string;
   email: string;
@@ -8,4 +8,12 @@ export class User implements PrismaUser {
   created_at: Date;
   updated_at: Date;
   avatar: string;
+}
+
+export class UserDTO {
+  constructor(user: UserPrisma) {
+    this.user = user;
+  }
+
+  user: UserPrisma;
 }
