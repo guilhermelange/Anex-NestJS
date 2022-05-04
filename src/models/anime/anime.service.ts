@@ -88,7 +88,8 @@ export class AnimeService {
       },
     });
 
-    if (seasons?.length <= 0) throw new NotFoundException('Anime not found');
+    if (seasons?.length <= 0)
+      throw new NotFoundException('Anime/Season not found');
 
     return seasons;
   }
