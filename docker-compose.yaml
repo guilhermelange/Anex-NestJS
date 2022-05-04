@@ -11,6 +11,8 @@ services:
       - .:/home/node/app
     depends_on:
       - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/anex?schema=public
 
   db:
     build: .docker/postgres
