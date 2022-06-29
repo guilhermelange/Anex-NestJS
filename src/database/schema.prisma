@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
@@ -8,7 +9,7 @@ datasource db {
 }
 
 model Anime {
-  id                    String                @id() @default(uuid()) @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
   name                  String                @db.VarChar
   description           String                @db.VarChar
   cover_file            String                @db.VarChar
@@ -20,6 +21,7 @@ model Anime {
   playlist_link         String?               @default("") @db.VarChar
   anime_author          AnimeAuthor[]
   anime_genre           AnimeGenre[]
+  anime_collection      AnimeCollection[]
   anime_user_evaluation AnimeUserEvaluation[]
   anime_user_favorites  AnimeUserFavorites[]
   season                Season[]
@@ -47,6 +49,16 @@ model AnimeGenre {
   @@map("anime_genre")
 }
 
+model AnimeCollection {
+  animeId String @db.Uuid
+  collectionId String @db.Uuid
+  anime   Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  collection Collection  @relation(fields: [collectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([animeId, collectionId])
+  @@map("anime_collection")
+}
+
 model AnimeUserEvaluation {
   evaluation Boolean
   userId     String  @db.Uuid
@@ -69,7 +81,7 @@ model AnimeUserFavorites {
 }
 
 model Author {
-  id           String        @id() @default(uuid()) @db.Uuid
+  id           String        @id @default(uuid()) @db.Uuid
   name         String        @db.VarChar
   created_at   DateTime      @default(now()) @db.Timestamp(6)
   updated_at   DateTime      @default(now()) @db.Timestamp(6)
@@ -95,7 +107,7 @@ model Episode {
 }
 
 model Genre {
-  id          String       @id() @default(uuid()) @db.Uuid
+  id          String       @id @default(uuid()) @db.Uuid
   name        String       @db.VarChar
   created_at  DateTime     @default(now()) @db.Timestamp(6)
   updated_at  DateTime     @default(now()) @db.Timestamp(6)
@@ -119,7 +131,7 @@ model Season {
 }
 
 model User {
-  id                    String                @id() @default(uuid()) @db.Uuid
+  id                    String                @id @default(uuid()) @db.Uuid
   name                  String                @db.VarChar
   email                 String                @db.VarChar
   password              String                @db.VarChar
@@ -130,4 +142,13 @@ model User {
   anime_user_favorites  AnimeUserFavorites[]
 
   @@map("user")
+}
+
+model Collection {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @db.VarChar
+  trending    Boolean      @default(false)
+  anime_collection AnimeCollection[]
+
+  @@map("collection")
 }

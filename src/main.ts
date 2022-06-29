@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/exceptions/httpException.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -12,6 +12,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
   await app.listen(3000);
 }
 bootstrap();
