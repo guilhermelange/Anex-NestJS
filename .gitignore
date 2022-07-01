@@ -39,3 +39,5 @@ lerna-debug.log*
 !/upload/.gitkeep
 .docker/dbdata/*
 !.docker/dbdata/.gitkeep
+
+/*.env
