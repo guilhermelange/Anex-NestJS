@@ -1,15 +1,69 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService, Top } from 'src/database/prisma';
 
 @Injectable()
 export class CollectionService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findTopCollections(userId: string, filter: string) {
+    let topFilter: Top = Top.NONE;
+    if (filter.includes('animes')) {
+      topFilter = Top.ANIME;
+    }
+
+    if (filter.includes('playlist')) {
+      topFilter = Top.PLAYLIST;
+    }
+
+    if (topFilter == Top.NONE) {
+      throw new BadRequestException('Invalid top filter');
+    }
+
+    const collections = await this.prisma.collection.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      where: {
+        top: topFilter,
+      },
+      orderBy: {
+        trending: 'desc',
+      },
+    });
+
+    const response = [];
+
+    for (const collection of collections) {
+      const animes = await this.prisma.$queryRaw`
+        SELECT a.id,
+               a."name",
+               a.image_file
+            FROM anime a
+          WHERE EXISTS (SELECT NULL
+                          FROM anime_collection ac
+                        WHERE ac."animeId"= a.id
+                          AND ac."collectionId" = ${collection.id})`;
+
+      const collectionResponse = { ...collection, animes };
+      response.push(collectionResponse);
+    }
+
+    return response;
+  }
 
   async findAll(userId: string) {
     const collections = await this.prisma.collection.findMany({
       select: {
         id: true,
         name: true,
+      },
+      where: {
+        top: Top.NONE,
       },
       orderBy: {
         trending: 'desc',

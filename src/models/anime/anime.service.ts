@@ -45,13 +45,32 @@ export class AnimeService {
         name: true,
         description: true,
         cover_file: true,
-        parental_rating: true,
         start_date: true,
         image_file: true,
         playlist_link: true,
         anime_user_evaluation: true,
         anime_user_favorites: true,
-        season: true,
+        season: {
+          select: {
+            name: true,
+            number: true,
+            episode: {
+              select: {
+                name: true,
+                description: true,
+                link: true,
+                duration: true,
+                number: true,
+              },
+              orderBy: {
+                number: 'asc',
+              },
+            },
+          },
+          orderBy: {
+            number: 'asc',
+          },
+        },
       },
     });
 
@@ -88,8 +107,6 @@ export class AnimeService {
       },
     });
 
-    if (seasons?.length <= 0) throw new NotFoundException('Anime not found');
-
     return seasons;
   }
 
@@ -116,19 +133,30 @@ export class AnimeService {
     if (!user) throw new NotFoundException('User not found');
 
     if (animeUpdate?.favorite !== undefined) {
-      await this.prisma.animeUserFavorites.upsert({
-        create: {
-          animeId: id,
-          userId,
-        },
-        where: {
-          animeId_userId: {
+      if (animeUpdate.favorite) {
+        await this.prisma.animeUserFavorites.upsert({
+          create: {
             animeId: id,
             userId,
           },
-        },
-        update: {},
-      });
+          where: {
+            animeId_userId: {
+              animeId: id,
+              userId,
+            },
+          },
+          update: {},
+        });
+      } else {
+        await this.prisma.animeUserFavorites.delete({
+          where: {
+            animeId_userId: {
+              animeId: id,
+              userId,
+            },
+          },
+        });
+      }
     }
 
     if (animeUpdate?.evaluation !== undefined) {
@@ -155,7 +183,7 @@ export class AnimeService {
 
   // Helper
   loadAnimeResponse(userId: string, anime: any) {
-    let evaluation = false;
+    let evaluation: boolean = null;
     let total = 0;
     let like = 0;
     for (const item of anime?.anime_user_evaluation) {
@@ -167,24 +195,25 @@ export class AnimeService {
     like = like === 0 ? 1 : like;
     total = total === 0 ? 1 : total;
 
-    const evaluationMedia = +((like / total) * 100).toFixed(2);
+    const evaluation_media = +((like / total) * 100).toFixed(0);
 
     const favorite = anime.anime_user_favorites.some(
       (item) => item.userId == userId,
     );
 
-    const seasonsCount = anime?.season?.length;
+    const season_count = anime?.season?.length;
 
     anime.anime_user_evaluation = undefined;
     anime.anime_user_favorites = undefined;
-    anime.season = undefined;
+    anime.start_year = anime.start_date.getUTCFullYear();
+    anime.start_date = undefined;
 
     const response = {
       ...anime,
       evaluation,
       favorite,
-      evaluationMedia,
-      seasonsCount,
+      evaluation_media,
+      season_count,
     };
 
     return response;

@@ -50,10 +50,10 @@ model AnimeGenre {
 }
 
 model AnimeCollection {
-  animeId String @db.Uuid
-  collectionId String @db.Uuid
-  anime   Anime  @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  collection Collection  @relation(fields: [collectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  animeId      String     @db.Uuid
+  collectionId String     @db.Uuid
+  anime        Anime      @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([animeId, collectionId])
   @@map("anime_collection")
@@ -145,10 +145,17 @@ model User {
 }
 
 model Collection {
-  id          String       @id @default(uuid()) @db.Uuid
-  name        String       @db.VarChar
-  trending    Boolean      @default(false)
+  id               String            @id @default(uuid()) @db.Uuid
+  name             String            @db.VarChar
+  trending         Boolean           @default(false)
+  top              Top               @default(NONE)
   anime_collection AnimeCollection[]
 
   @@map("collection")
+}
+
+enum Top {
+  NONE
+  ANIME
+  PLAYLIST
 }

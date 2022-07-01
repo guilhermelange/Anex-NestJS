@@ -11,4 +11,11 @@ export class CollectionController {
     const { id: userId } = request.user;
     return this.collectionService.findAll(userId);
   }
+
+  @Get(':filter')
+  findTop(@Req() request: Request) {
+    const { filter } = request.params;
+    const { id: userId } = request.user;
+    return this.collectionService.findTopCollections(userId, filter);
+  }
 }
