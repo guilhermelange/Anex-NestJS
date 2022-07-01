@@ -13,6 +13,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  const PORT = process.env.PORT || 3001;
+  await app.listen(PORT);
 }
 bootstrap();
